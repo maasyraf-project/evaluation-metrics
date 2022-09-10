@@ -2,6 +2,14 @@ import numpy as np
 import scipy
 
 def remove_silent_frame(xl, xr, yl, yr, dyn_range, n, k):
+    # ensure the input audio is single column vector
+    xl = xl[:]
+    xr = xr[:]
+    yl = yl[:]
+    yr = yr[:]
+
+    print(len(xl))
+
     # setup masking parameters
     frames  = np.arange(0, len(xl)-n, k)  # define length of frames
     w       = scipy.signal.windows.hann(n)  # define window (Hanning)

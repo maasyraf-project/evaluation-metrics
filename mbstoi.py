@@ -2,6 +2,7 @@ import numpy as np
 import scipy
 import matplotlib.pyplot as plt
 from utils import *
+import librosa
 
 # setup parameter
 # parameter for STOI
@@ -30,10 +31,13 @@ p               = 1.6       # constant for level shift deviation
 
 # prepare evaluation signals
 # import all audio
-fs, xl = scipy.io.wavfile.read("clean_left_signal.wav")
-fs, xr = scipy.io.wavfile.read("clean_right_signal.wav")
-fs, yl = scipy.io.wavfile.read("processed_left_signal.wav")
-fs, yr = scipy.io.wavfile.read("processed_right_signal.wav")
+fs, x = scipy.io.wavfile.read("output.wav")
+fs, y = scipy.io.wavfile.read("output-noised.wav")
+
+xl = x[:,0]
+xr = x[:,1]
+yl = y[:,0]
+yr = y[:,1]
 
 # check the data type of all audio
 if xl.dtype != np.float32:
@@ -47,13 +51,13 @@ if yr.dtype != np.float32:
 
 # check the frequency sampling for processing the audio data
 if fs != fs_stoi:
-    xl = scipy.signal.resample(xl, fs_stoi)
-    xr = scipy.signal.resample(xr, fs_stoi)
-    yl = scipy.signal.resample(yl, fs_stoi)
-    yr = scipy.signal.resample(yr, fs_stoi)
+    xl = librosa.resample(xl, fs, fs_stoi)
+    xr = librosa.resample(xr, fs, fs_stoi)
+    yl = librosa.resample(yl, fs, fs_stoi)
+    yr = librosa.resample(yr, fs, fs_stoi)
 
 # remove silent frame of signal
-xl, xr, yl, yr  = remove_silent_frame(xl, xr, yl, yr, dyn_range, n, k)
+xl, xr, yl, yr  = remove_silent_frame(xl, xr, yl, yr, dyn_range, n_frame, n_frame/2)
 
 # handle case when signals is zeros
 if abs(np.log10(np.linalg.norm(xl, 2)/np.linalg.norm(yl, 2))) > 5.0 or abs(np.log10(np.linalg.norm(xr, 2)/np.linalg.norm(yr, 2))) > 5.0:
